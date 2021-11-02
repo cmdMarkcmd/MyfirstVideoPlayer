@@ -147,6 +147,7 @@ public class Adapter_Biggest extends RecyclerView.Adapter<Adapter_Biggest.MyView
         holder.videoView.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             @Override
             public void onCompletion(MediaPlayer mp) {
+                mp.start();
             }
         });
         holder.deleteButton.setOnClickListener(new View.OnClickListener() {
