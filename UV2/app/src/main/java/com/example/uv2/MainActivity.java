@@ -37,7 +37,7 @@ public class MainActivity extends AppCompatActivity {
     private Context context;
     private List<MediaVideo> list;
 
-    private ImageView picture;
+    private RoundImage picture;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -87,7 +87,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onResume() {
-        picture = (ImageView) findViewById(R.id.pic_1);
+        picture = (RoundImage) findViewById(R.id.pic_1);
         List<MediaPicture> mediaPictures= LitePal.findAll(MediaPicture.class);
         if(!mediaPictures.isEmpty()){
             String path = LitePal.findLast(MediaPicture.class).getPath();
@@ -101,8 +101,6 @@ public class MainActivity extends AppCompatActivity {
         recyclerView = (RecyclerView) findViewById(R.id.recyclerView);
         adapter = new Adapter(context,list);
         StaggeredGridLayoutManager manager= new StaggeredGridLayoutManager(3, StaggeredGridLayoutManager.VERTICAL);
-//        LinearLayoutManager manager = new LinearLayoutManager(context);
-//        manager.setOrientation(LinearLayoutManager.VERTICAL);
         recyclerView.setLayoutManager(manager);
         recyclerView.setAdapter(adapter);
 

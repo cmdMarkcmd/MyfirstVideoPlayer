@@ -102,9 +102,6 @@ public class Adapter extends RecyclerView.Adapter<Adapter.MyViewHolder>{
                     });
                 }else{
                     Intent intent = new Intent(context, ShowVideo.class);
-//                    List<MediaVideo> mv = LitePal.where("password == ?",mediaVideo.getPassword()).find(MediaVideo.class);
-//                    Toast.makeText(context, String.valueOf(position_T), Toast.LENGTH_SHORT).show();
-//                    int position_T = mv.indexOf(mediaVideo);
                     intent.putExtra("ph",mediaVideo.getVideoId());
                     intent.putExtra("data_extra",mediaVideo.getPassword());
                     context.startActivity(intent);

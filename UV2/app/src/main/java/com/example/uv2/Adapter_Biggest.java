@@ -7,6 +7,7 @@ import android.media.MediaPlayer;
 import android.os.SystemClock;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -55,20 +56,21 @@ public class Adapter_Biggest extends RecyclerView.Adapter<Adapter_Biggest.MyView
         return myViewHolder;
     }
 
-    public void CustomDialog(int position) {
+    public void CustomDialog(MediaVideo mediaVideo, MyViewHolder holder) {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         final AlertDialog dialog = builder.create();
         View dialogView = View.inflate(context, R.layout.alert_dialog, null);
         dialog.setView(dialogView);
         dialog.show();
 
-        MediaVideo mediaVideo = LitePal.findAll(MediaVideo.class).get(position);
         final EditText et_name = dialogView.findViewById(R.id.et_name);
+        et_name.setText(mediaVideo.getName());
         final EditText et_sts = dialogView.findViewById(R.id.et_sts);
+        et_sts.setText(mediaVideo.getSentence());
         final EditText et_tag = dialogView.findViewById(R.id.et_tag);
+        et_tag.setText(mediaVideo.getTag());
         final Button btn_okay = dialogView.findViewById(R.id.btn_okay);
         final Button btn_cancel = dialogView.findViewById(R.id.btn_cancel);
-
 
         btn_okay.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -78,13 +80,16 @@ public class Adapter_Biggest extends RecyclerView.Adapter<Adapter_Biggest.MyView
                 final String tag = et_tag.getText().toString();
                 if (TextUtils.isEmpty(name)) {
                     Toast.makeText(context, "视频名不能为空!", Toast.LENGTH_SHORT).show();
-                    mediaVideo.setName("  <未命名>");
+                    mediaVideo.setName("<未命名>");
                 }else{
-                    mediaVideo.setName("  "+name);
+                    mediaVideo.setName(name);
                 }
-                if(!TextUtils.isEmpty(sts)) mediaVideo.setSentence("简介："+sts);
-                if(!TextUtils.isEmpty(tag)) mediaVideo.setTag("标签："+tag);
+                if(!TextUtils.isEmpty(sts)) mediaVideo.setSentence(sts);
+                if(!TextUtils.isEmpty(tag)) mediaVideo.setTag(tag);
                 mediaVideo.save();
+                holder.nameButton.setText(mediaVideo.getName());
+                holder.tagButton.setText("标签："+mediaVideo.getTag());
+                holder.textButton.setText("简介："+mediaVideo.getSentence());
                 dialog.dismiss();
             }
         });
@@ -103,47 +108,51 @@ public class Adapter_Biggest extends RecyclerView.Adapter<Adapter_Biggest.MyView
         position = holder.getAdapterPosition();
         MediaVideo mediaVideo = list.get(position);
         holder.nameButton.setText(mediaVideo.getName());
-        holder.tagButton.setText(mediaVideo.getTag());
-        holder.textButton.setText(mediaVideo.getSentence());
+        holder.tagButton.setText("标签："+mediaVideo.getTag());
+        holder.textButton.setText("简介："+mediaVideo.getSentence());
         holder.likeButton.setText("赞："+String.valueOf(mediaVideo.getLike()));
         holder.videoView.setVideoPath(mediaVideo.getPath());
         holder.likeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                holder.flyHeartView.startFly();
-                holder.flyHeartView.startFly();
-                holder.flyHeartView.startFly();
+                holder.flyHeartView.startFly(1350f,2100f);
+                holder.flyHeartView.startFly(1350f,2100f);
+                holder.flyHeartView.startFly(1350f,2100f);
                 mediaVideo.setLike(mediaVideo.getLike()+1);
                 mediaVideo.save();
                 holder.likeButton.setText("赞："+String.valueOf(mediaVideo.getLike()));
             }
         });
 
-
+        //设置进度条
         MediaController mediaController = new MediaController(context);
         holder.videoView.setMediaController(mediaController);
         mediaController.setMediaPlayer(holder.videoView);
-        mediaController.setPadding(0,0,0,0);
         holder.videoView.start();
-        holder.itemView.setOnClickListener(new View.OnClickListener() {
+
+
+        holder.itemView.setOnTouchListener(new View.OnTouchListener() {
             @Override
-            public void onClick(View v) {
-                long currentT = SystemClock.uptimeMillis();
-                if(currentT - lastClickTime < 300) {
-                    holder. flyHeartView.startFly();
-                    holder.flyHeartView.startFly();
-                    holder.flyHeartView.startFly();
-                    mediaVideo.setLike(mediaVideo.getLike()+1);
-                    mediaVideo.save();
-                    holder.likeButton.setText("赞："+String.valueOf(mediaVideo.getLike()));
-                }else if(!holder.videoView.isPlaying()){
-                    holder.videoView.start();
+            public boolean onTouch(View v, MotionEvent event) {holder.itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    long currentT = SystemClock.uptimeMillis();
+                    if(currentT - lastClickTime < 300) {
+                        holder.flyHeartView.startFly(event.getX(),event.getY());
+                        holder.flyHeartView.startFly(event.getX(),event.getY());
+                        holder.flyHeartView.startFly(event.getX(),event.getY());
+                        mediaVideo.setLike(mediaVideo.getLike()+1);
+                        mediaVideo.save();
+                        holder.likeButton.setText("赞："+String.valueOf(mediaVideo.getLike()));
+                    }else if(!holder.videoView.isPlaying()){
+                        holder.videoView.start();
+                    }
+                    lastClickTime = currentT;
                 }
-                lastClickTime = currentT;
+            });
+                return false;
             }
         });
-
-
         holder.videoView.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             @Override
             public void onCompletion(MediaPlayer mp) {
@@ -160,10 +169,7 @@ public class Adapter_Biggest extends RecyclerView.Adapter<Adapter_Biggest.MyView
         holder.editButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                CustomDialog(holder.getAdapterPosition());
-                holder.nameButton.setText(mediaVideo.getName());
-                holder.textButton.setText(mediaVideo.getSentence());
-                holder.tagButton.setText(mediaVideo.getTag());
+                CustomDialog(mediaVideo,holder);
             }
         });
         holder.tagButton.setOnClickListener(new View.OnClickListener() {
@@ -178,14 +184,17 @@ public class Adapter_Biggest extends RecyclerView.Adapter<Adapter_Biggest.MyView
         holder.itemView.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
             @Override
             public void onViewAttachedToWindow(View v) {
+                mediaController.hide();
                 holder.videoView.start();
             }
 
             @Override
             public void onViewDetachedFromWindow(View v) {
+                mediaController.hide();
                 holder.videoView.pause();
             }
         });
+
     }
 
     @Override
@@ -215,5 +224,6 @@ public class Adapter_Biggest extends RecyclerView.Adapter<Adapter_Biggest.MyView
             flyHeartView = (FlyHeartView) itemView.findViewById(R.id.Fly);
         }
     }
+
 
 }

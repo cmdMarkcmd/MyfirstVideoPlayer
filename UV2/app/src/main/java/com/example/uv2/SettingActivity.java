@@ -359,9 +359,9 @@ public class SettingActivity extends AppCompatActivity {
         mediaVideo.setPath(path);
         mediaVideo.setVideoId(CreatePath(bitmap));
         mediaVideo.setPwd(false);
-        mediaVideo.setName("  <未命名>");
-        mediaVideo.setSentence("简介：无");
-        mediaVideo.setTag("标签：视频");
+        mediaVideo.setName("<未命名>");
+        mediaVideo.setSentence("无");
+        mediaVideo.setTag("视频");
         mediaVideo.setPassword("((((~null!@#$%w#je*wf$y5#@feg))))");
         customDialog(mediaVideo);
         mediaVideo.save();
@@ -386,13 +386,13 @@ public class SettingActivity extends AppCompatActivity {
                 final String sts = et_sts.getText().toString();
                 final String tag = et_tag.getText().toString();
                 if (TextUtils.isEmpty(name)) {
-                    mediaVideo.setName("  <未命名>");
+                    mediaVideo.setName("<未命名>");
                     Toast.makeText(SettingActivity.this, "视频名不能为空!", Toast.LENGTH_SHORT).show();
                 }else{
                     mediaVideo.setName("  "+name);
                 }
-                if(!TextUtils.isEmpty(sts)) mediaVideo.setSentence("简介："+sts);
-                if(!TextUtils.isEmpty(tag)) mediaVideo.setTag("标签："+tag);
+                if(!TextUtils.isEmpty(sts)) mediaVideo.setSentence(sts);
+                if(!TextUtils.isEmpty(tag)) mediaVideo.setTag(tag);
                 mediaVideo.save();
                 dialog.dismiss();
                 Toast.makeText(SettingActivity.this, "视频载入成功，请返回主页面查看", Toast.LENGTH_SHORT).show();

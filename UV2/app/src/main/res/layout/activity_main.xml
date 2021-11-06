@@ -19,7 +19,7 @@
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/back_g2" />
 
-    <ImageView
+    <com.example.uv2.RoundImage
         android:id="@+id/pic_1"
         android:layout_width="100dp"
         android:layout_height="100dp"

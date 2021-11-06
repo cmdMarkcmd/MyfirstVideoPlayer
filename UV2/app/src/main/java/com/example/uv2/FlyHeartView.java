@@ -6,6 +6,9 @@ import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.content.res.ColorStateList;
+import android.content.res.Resources;
+import android.content.res.TypedArray;
+import android.graphics.Canvas;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,6 +16,7 @@ import android.view.animation.AccelerateInterpolator;
 import android.view.animation.CycleInterpolator;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
 
 import androidx.constraintlayout.widget.ConstraintLayout;
 
@@ -26,53 +30,58 @@ public class FlyHeartView extends RelativeLayout{
 
     private int defoutWidth = 200;//默认控件宽度
     private long mDuration = 3000;//默认动画时间
+    private Context mcontext;
     //颜色集合 从中获取颜色
     private int[] color = {
             0xFFFF34B3, 0xFF9ACD32, 0xFF9400D3, 0xFFEE9A00,
             0xFFFFB6C1, 0xFFDA70D6, 0xFF8B008B, 0xFF4B0082,
-            0xFF483D8B, 0xFF1E90FF, 0xFF00BFFF, 0xFF00FF7F
+            0xFF483D8B, 0xFF1E90FF, 0xFF00BFFF, 0xFF00FF7F,
+            0xFFDC143C, 0xFFDC143C, 0xFFDC143C, 0xFFDC143C,
     };
 
     public FlyHeartView(Context context) {
         super(context);
-        initFrameLayout();
+        initFrameLayout(context);
     }
 
     public FlyHeartView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        initFrameLayout();
+        initFrameLayout(context);
     }
 
-    private void initFrameLayout() {
-        ViewGroup.LayoutParams params = new ViewGroup.LayoutParams(defoutWidth, ViewGroup.LayoutParams.WRAP_CONTENT);
-        setLayoutParams(params);
+    public FlyHeartView(Context context,AttributeSet attrs,int defStyleAttr){
+        super(context,attrs,defStyleAttr);
+        initFrameLayout(context);
+    }
+
+    private void initFrameLayout(Context context) {
+        mcontext = context;
     }
 
     /**
      * 创建一个心形的view视图
      */
-    private ImageView createHeartView() {
-        ImageView heartIv = new ImageView(getContext());
-        LayoutParams params = new LayoutParams(defoutWidth / 2, defoutWidth / 2);
 
-        //控件位置
-        params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
-        params.addRule(RelativeLayout.CENTER_HORIZONTAL);
-
-        heartIv.setLayoutParams(params);
-        heartIv.setImageResource(R.mipmap.ic_heart);
+    private ImageView createHeartView(float x, float y) {
+        ImageView heartIv = new ImageView(mcontext);
         //改变颜色
+        LayoutParams params = new LayoutParams(100,100);
+        params.leftMargin = (int) x - 100;
+        params.topMargin = (int) y -300;
+        heartIv.setImageResource(R.drawable.ic_heart);
+        heartIv.setLayoutParams(params);
         heartIv.setImageTintList(ColorStateList.valueOf(color[(int) (color.length * Math.random())]));
         return heartIv;
     }
-
     /**
      * 执行动画
      * 在展示调用该方法
      */
-    public void startFly() {
-        final ImageView heartIv = createHeartView();
+    public void  startFly(float x,float y){
+
+        final  ImageView heartIv = createHeartView(x,y);
         addView(heartIv);
+//        Toast.makeText(mcontext,"Y:"+String.valueOf(y-300f),Toast.LENGTH_SHORT).show();
         AnimatorSet animatorSet = new AnimatorSet();
         animatorSet.play(createTranslationX(heartIv))
                 .with(createTranslationY(heartIv))
@@ -116,8 +125,6 @@ public class FlyHeartView extends RelativeLayout{
         animator.setInterpolator(new AccelerateInterpolator());
         return animator;
     }
-
-
     /**
      * 加速放大动画
      *
@@ -132,7 +139,6 @@ public class FlyHeartView extends RelativeLayout{
         animatorSet.play(animatorX).with(animatorY);
         return animatorSet;
     }
-
     /**
      * 透明度动画
      *
@@ -156,6 +162,5 @@ public class FlyHeartView extends RelativeLayout{
         animator.setInterpolator(new CycleInterpolator((float) (6 * Math.random())));
         return animator;
     }
-
 
 }
