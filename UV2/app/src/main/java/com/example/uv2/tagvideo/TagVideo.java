@@ -1,4 +1,4 @@
-package com.example.uv2;
+package com.example.uv2.tagvideo;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
@@ -8,7 +8,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.TextView;
-import android.widget.Toast;
+
+import com.example.uv2.adapter.Adapter;
+import com.example.uv2.MediaVideo;
+import com.example.uv2.R;
 
 import org.litepal.LitePal;
 
@@ -26,13 +29,10 @@ public class TagVideo extends AppCompatActivity {
 
         TextView textView = (TextView) findViewById(R.id.Tag1);
 
-
         Intent intent =getIntent();
         tagToShow = intent.getStringExtra("extra_data2");
         textView.setText(tagToShow);
         List<MediaVideo> list = LitePal.where("tag == ?",tagToShow).find(MediaVideo.class);
-//        Toast.makeText(TagVideo.this, tagToShow, Toast.LENGTH_SHORT).show();
-
         context = this;
         recyclerView = (RecyclerView) findViewById(R.id.recyclerView2);
         adapter = new Adapter(context,list);

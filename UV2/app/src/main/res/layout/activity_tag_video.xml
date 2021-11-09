@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#1a1a1a"
-    tools:context=".TagVideo">
+    tools:context=".tagvideo.TagVideo">
 
     <TextView
         android:id="@+id/Tag1"

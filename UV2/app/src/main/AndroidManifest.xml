@@ -14,20 +14,19 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.UV2">
         <activity
-            android:name=".ShowFull"
+            android:name=".showfull.ShowFull"
             android:exported="false" />
         <activity
-            android:name=".TagVideo"
-            android:launchMode="singleTask"
+            android:name=".tagvideo.TagVideo"
             android:exported="false" />
         <activity
-            android:name=".ShowVideo"
+            android:name=".showvideo.ShowVideo"
             android:exported="false" />
         <activity
-            android:name=".SettingActivity"
+            android:name=".setting.SettingActivity"
             android:exported="false" />
         <activity
-            android:name=".MainActivity"
+            android:name=".mainactivity.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

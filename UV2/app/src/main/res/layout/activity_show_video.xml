@@ -35,8 +35,8 @@
 
     <TextView
         android:id="@+id/TextViewToShow"
-        android:layout_width="95dp"
-        android:layout_height="26dp"
+        android:layout_width="138dp"
+        android:layout_height="30dp"
         android:layout_marginStart="16dp"
         android:layout_marginBottom="12dp"
         android:text="TextView"

@@ -1,16 +1,11 @@
-package com.example.uv2;
+package com.example.uv2.setting;
 
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-import androidx.core.content.FileProvider;
+import static android.app.Activity.RESULT_OK;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.content.ContentUris;
-import android.content.ContentValues;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
@@ -19,8 +14,6 @@ import android.graphics.BitmapFactory;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.Build;
-import android.os.Bundle;
-import android.os.Environment;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.text.TextUtils;
@@ -28,13 +21,20 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.Toast;
-import android.widget.VideoView;
+
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.core.content.FileProvider;
+
+import com.example.uv2.MediaPicture;
+import com.example.uv2.MediaVideo;
+import com.example.uv2.R;
 
 import org.litepal.LitePal;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -44,7 +44,7 @@ import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Locale;
 
-public class SettingActivity extends AppCompatActivity {
+public class ModelSetting implements IModelSetting{
 
     public static final int TAKE_PHOTO = 1;
 
@@ -52,124 +52,103 @@ public class SettingActivity extends AppCompatActivity {
 
     public static final int CHOOSE_Video = 3;
 
+    List<MediaPicture> mediaPictures;
+    Uri imageUri ;
+    AppCompatActivity appCompatActivityUse;
+    IFinishSettingListener listener;
 
-    private ImageView pic2;
+    public ModelSetting(IFinishSettingListener listener){
+        this.listener = listener;
+    }
 
-    private Uri imageUri;
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_setting);
+    public boolean haveHeadShot(){
+        mediaPictures = LitePal.findAll(MediaPicture.class);
+        return  (!mediaPictures.isEmpty());
+    }
 
-        pic2 = (ImageView) findViewById(R.id.imageView2) ;
-        List<MediaPicture> mediaPictures= LitePal.findAll(MediaPicture.class);
-        if(!mediaPictures.isEmpty()){
-            String path = LitePal.findLast(MediaPicture.class).getPath();
-            Bitmap bitmap =BitmapFactory.decodeFile(path);
-            pic2.setImageBitmap(bitmap);
+    @Override
+    public Bitmap getHeadShot(){
+        return BitmapFactory.decodeFile(LitePal.findLast(MediaPicture.class).getPath());
+    }
+
+
+    @Override
+    public void openCamera(AppCompatActivity appCompatActivity){
+        File outputImage = new File(appCompatActivity.getExternalCacheDir(), "output_image.jpg");
+        try {
+            if (outputImage.exists()) {
+                outputImage.delete();
+            }
+            outputImage.createNewFile();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        Button chooseFromAlbum = (Button) findViewById(R.id.button4);
-        Button takePhoto = (Button) findViewById(R.id.button5);
-        takePhoto.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // 创建File对象，用于存储拍照后的图片
-                File outputImage = new File(getExternalCacheDir(), "output_image.jpg");
-                try {
-                    if (outputImage.exists()) {
-                        outputImage.delete();
-                    }
-                    outputImage.createNewFile();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                if (Build.VERSION.SDK_INT < 24) {
-                    imageUri = Uri.fromFile(outputImage);
-                } else {
-                    imageUri = FileProvider.getUriForFile(SettingActivity.this, "com.example.cameraalbumtest.fileprovider", outputImage);
-                }
-                // 启动相机程序
-                Intent intent = new Intent("android.media.action.IMAGE_CAPTURE");
-                intent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
-                startActivityForResult(intent, TAKE_PHOTO);
-            }
-        });
-        chooseFromAlbum.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (ContextCompat.checkSelfPermission(SettingActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                    ActivityCompat.requestPermissions(SettingActivity.this, new String[]{ Manifest.permission. WRITE_EXTERNAL_STORAGE }, 1);
-                } else {
-                    openAlbum();
-                }
-            }
-
-        });
-        Button chooseVideo = (Button) findViewById(R.id.videoAdd);
-        chooseVideo.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (ContextCompat.checkSelfPermission(SettingActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                    ActivityCompat.requestPermissions(SettingActivity.this, new String[]{ Manifest.permission. WRITE_EXTERNAL_STORAGE }, 3);
-                } else {
-                     // 初始化MediaPlayer
-                    initVideoPath();
-
-                }
-            }
-        });
-        Button pwdButton = (Button) findViewById(R.id.buttonpwd);
-        pwdButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(SettingActivity.this,ShowFull.class);
-                startActivity(intent);
-            }
-        });
-    }
-
-    private void initVideoPath() {
-        Intent intent = new Intent("android.intent.action.GET_CONTENT");
-        intent.setType("video/*");
-        startActivityForResult(intent, CHOOSE_Video); // 打开相册
-    }
-
-    private void openAlbum() {
-        Intent intent = new Intent("android.intent.action.GET_CONTENT");
-        intent.setType("image/*");
-        startActivityForResult(intent, CHOOSE_PHOTO); // 打开相册
+        if (Build.VERSION.SDK_INT < 24) {
+            imageUri = Uri.fromFile(outputImage);
+        } else {
+            imageUri = FileProvider.getUriForFile(appCompatActivity, "com.example.cameraalbumtest.fileprovider", outputImage);
+        }
+        // 启动相机程序
+        Intent intent = new Intent("android.media.action.IMAGE_CAPTURE");
+        intent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
+        appCompatActivity.startActivityForResult(intent,TAKE_PHOTO);
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+    public void ChoosePhoto(AppCompatActivity appCompatActivity) {
+        if (ContextCompat.checkSelfPermission(appCompatActivity, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(appCompatActivity, new String[]{ Manifest.permission. WRITE_EXTERNAL_STORAGE }, 1);
+        } else {
+            // get photo
+            Intent intent = new Intent("android.intent.action.GET_CONTENT");
+            intent.setType("image/*");
+            appCompatActivity.startActivityForResult(intent, CHOOSE_PHOTO); // 打开相册
+        }
+
+    }
+
+    @Override
+    public void ChooseVideo(AppCompatActivity appCompatActivity) {
+        if (ContextCompat.checkSelfPermission(appCompatActivity, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(appCompatActivity, new String[]{ Manifest.permission. WRITE_EXTERNAL_STORAGE }, 3);
+        } else {
+            Intent intent = new Intent("android.intent.action.GET_CONTENT");
+            intent.setType("video/*");
+            appCompatActivity.startActivityForResult(intent,CHOOSE_Video);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(AppCompatActivity appCompatActivity, int requestCode, String[] permissions, int[] grantResults) {
         switch (requestCode) {
             case 1:
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    openAlbum();
+                    ChoosePhoto(appCompatActivity);
                 } else {
-                    Toast.makeText(this, "Y拒绝权限将无法使用程序", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(appCompatActivity, "拒绝权限将无法使用程序", Toast.LENGTH_SHORT).show();
                 }
                 break;
             case 3:
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    initVideoPath();
+                    ChooseVideo(appCompatActivity);
                 } else {
-                    Toast.makeText(this, "拒绝权限将无法使用程序", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(appCompatActivity, "拒绝权限将无法使用程序", Toast.LENGTH_SHORT).show();
                 }
                 break;
             default:
         }
     }
 
-    @SuppressLint("MissingSuperCall")
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    public void onActivityResult(AppCompatActivity appCompatActivity, int requestCode, int resultCode, Intent data) {
+        appCompatActivityUse = appCompatActivity;
         switch (requestCode) {
             case TAKE_PHOTO:
                 if (resultCode == RESULT_OK) {
                     try {
 //                         将拍摄的照片显示出来
-                        Bitmap bitmap = BitmapFactory.decodeStream(getContentResolver().openInputStream(imageUri));
+                        Bitmap bitmap = BitmapFactory.decodeStream(appCompatActivity.getContentResolver().openInputStream(imageUri));
 //                        keepPicture(bitmap);
                         keepPicture(CreatePath(bitmap));
 //                        Do something;
@@ -209,14 +188,12 @@ public class SettingActivity extends AppCompatActivity {
 
 
 
-
-
     @TargetApi(19)
     private void handleImageOnKitKat(Intent data) {
         String imagePath = null;
         Uri uri = data.getData();
         Log.d("TAG", "handleImageOnKitKat: uri is " + uri);
-        if (DocumentsContract.isDocumentUri(this, uri)) {
+        if (DocumentsContract.isDocumentUri(appCompatActivityUse, uri)) {
             // 如果是document类型的Uri，则通过document id处理
             String docId = DocumentsContract.getDocumentId(uri);
             if("com.android.providers.media.documents".equals(uri.getAuthority())) {
@@ -237,16 +214,17 @@ public class SettingActivity extends AppCompatActivity {
         displayImage(imagePath); // 根据图片路径显示图片
     }
 
-    private void handleImageBeforeKitKat(Intent data) {
+    public void handleImageBeforeKitKat(Intent data) {
         Uri uri = data.getData();
         String imagePath = getImagePath(uri, null);
         displayImage(imagePath);
     }
 
-    private String getImagePath(Uri uri, String selection) {
+    @SuppressLint("Range")
+    public String getImagePath(Uri uri, String selection) {
         String path = null;
         // 通过Uri和selection来获取真实的图片路径
-        Cursor cursor = getContentResolver().query(uri, null, selection, null, null);
+        Cursor cursor = appCompatActivityUse.getContentResolver().query(uri, null, selection, null, null);
         if (cursor != null) {
             if (cursor.moveToFirst()) {
                 path = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.DATA));
@@ -261,27 +239,25 @@ public class SettingActivity extends AppCompatActivity {
             Bitmap bitmap = BitmapFactory.decodeFile(imagePath);
             keepPicture(imagePath);
         } else {
-            Toast.makeText(this, "failed to get image", Toast.LENGTH_SHORT).show();
+            Toast.makeText(appCompatActivityUse, "failed to get image", Toast.LENGTH_SHORT).show();
         }
     }
-    private void keepPicture(String path){
+    public void keepPicture(String path){
         MediaPicture mediaPicture = new MediaPicture();
         mediaPicture.setName("1");
         Bitmap bitmap =BitmapFactory.decodeFile(path);
         path = CreatePath(bitmap);
         mediaPicture.setPath(path);
         mediaPicture.save();
-//        bitmap = BitmapFactory.decodeFile(path);
-//        List<MediaPicture> mediaPictures= LitePal.findAll(MediaPicture.class);
-        pic2.setImageBitmap(bitmap);
+        listener.newHeadShot(bitmap);
     }
 
-    private String CreatePath(Bitmap bitmap)  {
+    public String CreatePath(Bitmap bitmap)  {
         try {
             Calendar calendar = new GregorianCalendar();
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMddHHmmss", Locale.getDefault());
             String picture_Name = simpleDateFormat.format(calendar.getTime());
-            String framePath = getExternalFilesDir(null).getAbsolutePath()+"/Picture";
+            String framePath = appCompatActivityUse.getExternalFilesDir(null).getAbsolutePath()+"/Picture";
             File frameFile = new File(framePath);
             if(!frameFile.exists()){
                 frameFile.mkdirs();
@@ -303,7 +279,7 @@ public class SettingActivity extends AppCompatActivity {
         String VideoPath = null;
         Uri uri = data.getData();
         Log.d("TAG", "handleVideoOnKitKat: uri is " + uri);
-        if (DocumentsContract.isDocumentUri(this, uri)) {
+        if (DocumentsContract.isDocumentUri(appCompatActivityUse, uri)) {
             // 如果是document类型的Uri，则通过document id处理
             String docId = DocumentsContract.getDocumentId(uri);
             if("com.android.providers.media.documents".equals(uri.getAuthority())) {
@@ -323,15 +299,16 @@ public class SettingActivity extends AppCompatActivity {
         displayVideo(VideoPath);
     }
 
-    private void handleVideoBeforeKitKat(Intent data) {
+    public void handleVideoBeforeKitKat(Intent data) {
         Uri uri = data.getData();
         String VideoPath = getVideoPath(uri, null);
         displayVideo(VideoPath);
     }
 
-    private String getVideoPath(Uri uri, String selection) {
+    @SuppressLint("Range")
+    public String getVideoPath(Uri uri, String selection) {
         String path = null;
-        Cursor cursor = getContentResolver().query(uri, null, selection, null, null);
+        Cursor cursor = appCompatActivityUse.getContentResolver().query(uri, null, selection, null, null);
         if (cursor != null) {
             if (cursor.moveToFirst()) {
                 path = cursor.getString(cursor.getColumnIndex(MediaStore.Video.Media.DATA));
@@ -341,15 +318,16 @@ public class SettingActivity extends AppCompatActivity {
         return path;
     }
 
-    private void displayVideo(String VideoPath) {
+    public void displayVideo(String VideoPath) {
         if (VideoPath != null) {
             Bitmap bitmap = BitmapFactory.decodeFile(VideoPath);
             keepVideo(VideoPath);
         } else {
-            Toast.makeText(this, "failed to get video", Toast.LENGTH_SHORT).show();
+            Toast.makeText(appCompatActivityUse, "failed to get video", Toast.LENGTH_SHORT).show();
         }
     }
-    private void keepVideo(String path){
+
+    public void keepVideo(String path){
         MediaMetadataRetriever mmr = new MediaMetadataRetriever();
         mmr.setDataSource(path);
         Bitmap bitmap= mmr.getFrameAtTime(0);
@@ -363,47 +341,25 @@ public class SettingActivity extends AppCompatActivity {
         mediaVideo.setSentence("无");
         mediaVideo.setTag("视频");
         mediaVideo.setPassword("((((~null!@#$%w#je*wf$y5#@feg))))");
-        customDialog(mediaVideo);
+        CreateDialog(mediaVideo);
         mediaVideo.save();
     }
-    public void customDialog(MediaVideo mediaVideo) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(SettingActivity.this);
-        final AlertDialog dialog = builder.create();
-        View dialogView = View.inflate(SettingActivity.this, R.layout.alert_dialog, null);
-        dialog.setView(dialogView);
-        dialog.show();
 
-        final EditText et_name = dialogView.findViewById(R.id.et_name);
-        final EditText et_sts = dialogView.findViewById(R.id.et_sts);
-        final EditText et_tag = dialogView.findViewById(R.id.et_tag);
-        final Button btn_okay = dialogView.findViewById(R.id.btn_okay);
-        final Button btn_cancel = dialogView.findViewById(R.id.btn_cancel);
-
-        btn_okay.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                final String name =et_name.getText().toString();
-                final String sts = et_sts.getText().toString();
-                final String tag = et_tag.getText().toString();
-                if (TextUtils.isEmpty(name)) {
-                    mediaVideo.setName("<未命名>");
-                    Toast.makeText(SettingActivity.this, "视频名不能为空!", Toast.LENGTH_SHORT).show();
-                }else{
-                    mediaVideo.setName("  "+name);
-                }
-                if(!TextUtils.isEmpty(sts)) mediaVideo.setSentence(sts);
-                if(!TextUtils.isEmpty(tag)) mediaVideo.setTag(tag);
-                mediaVideo.save();
-                dialog.dismiss();
-                Toast.makeText(SettingActivity.this, "视频载入成功，请返回主页面查看", Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        btn_cancel.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                dialog.dismiss();
-            }
-        });
+    public void CreateDialog(MediaVideo mediaVideo) {
+        listener.getDialog(mediaVideo);
     }
+
+    @Override
+    public void setInformation(MediaVideo mediaVideo, String name, String sts, String tag){
+        if (TextUtils.isEmpty(name)) {
+            mediaVideo.setName("<未命名>");
+            Toast.makeText(appCompatActivityUse, "视频名不能为空!", Toast.LENGTH_SHORT).show();
+        }else{
+            mediaVideo.setName(name);
+        }
+        if(!TextUtils.isEmpty(sts)) mediaVideo.setSentence(sts);
+        if(!TextUtils.isEmpty(tag)) mediaVideo.setTag(tag);
+        mediaVideo.save();
+    }
+
 }

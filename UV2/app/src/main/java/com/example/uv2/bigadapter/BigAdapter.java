@@ -1,13 +1,8 @@
-package com.example.uv2;
-
+package com.example.uv2.bigadapter;
+import android.annotation.SuppressLint;
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.media.MediaMetadata;
-import android.media.MediaMetadataRetriever;
-import android.provider.MediaStore;
-import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,15 +10,14 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
-import android.widget.VideoView;
-
 import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.RecyclerView;
 
-import org.litepal.LitePal;
+import com.example.uv2.MediaVideo;
+import com.example.uv2.R;
 
 import java.util.List;
+
 
 /*
 ① 创建一个继承RecyclerView.Adapter<VH>的Adapter类
@@ -33,15 +27,16 @@ import java.util.List;
    onBindViewHolder()
    getItemCount()
 */
-public class Adapter_Big extends RecyclerView.Adapter<Adapter_Big.MyViewHolder>{
+public class BigAdapter extends RecyclerView.Adapter<BigAdapter.MyViewHolder> implements IViewBigAdapter {
 
     private Context context;
-    private List<MediaVideo> list;
     private View inflater;
+    private IPresenterBigAdapter presenterAdapter;
     //构造方法，传入数据
-    public Adapter_Big(Context context, List<MediaVideo> list){
+    public BigAdapter(Context context, List<MediaVideo> list){
+        presenterAdapter = new PresenterBigAdapter(this);
+        presenterAdapter.AdapterInPresenter(context,list);
         this.context = context;
-        this.list = list;
     }
 
     @Override
@@ -53,18 +48,24 @@ public class Adapter_Big extends RecyclerView.Adapter<Adapter_Big.MyViewHolder>{
     }
 
 
-
-
+    @Override
+    public void setView(BigAdapter.MyViewHolder holder, MediaVideo mediaVideo){
+        Bitmap bitmap = BitmapFactory.decodeFile(mediaVideo.getVideoId());
+        holder.imageView.setImageBitmap(bitmap);
+        if(mediaVideo.isPwd()) {holder.textView.setText(mediaVideo.getName()+":"+"已加密，点击图片解锁");}
+        else {holder.textView.setText(mediaVideo.getName()+":"+"未加密，点击图片加密");}
+    }
 
     @Override
-    public void onBindViewHolder(MyViewHolder holder, int position) {
+    public int getItemCount() {
+        //返回Item总条数
+        return presenterAdapter.getSize();
+    }
+
+    @Override
+    public void onBindViewHolder(MyViewHolder holder, @SuppressLint("RecyclerView") int position) {
         //将数据和控件绑定
-        Bitmap bitmap = BitmapFactory.decodeFile(list.get(position).getVideoId());
-        holder.imageView.setImageBitmap(bitmap);
-        List<MediaVideo> mv = LitePal.findAll(MediaVideo.class);
-        MediaVideo mediaVideo = mv.get(position);
-        if(list.get(position).isPwd()) {holder.textView.setText(mediaVideo.getName()+":"+"已加密，点击图片解锁");}
-        else {holder.textView.setText(mediaVideo.getName()+":"+"未加密，点击图片加密");}
+        presenterAdapter.showVideos(holder,position);
         holder.imageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -80,28 +81,7 @@ public class Adapter_Big extends RecyclerView.Adapter<Adapter_Big.MyViewHolder>{
                     @Override
                     public void onClick(View view) {
                         final String pwd = ed_pwd.getText().toString();
-                        if (TextUtils.isEmpty(pwd)) {
-                            Toast.makeText(context, "密码不能为空!", Toast.LENGTH_SHORT).show();
-                        }else{
-                            if (!mediaVideo.isPwd()){
-                                mediaVideo.setPwd(true);
-                                mediaVideo.setPassword(pwd);
-                                mediaVideo.save();
-                                holder.textView.setText(mediaVideo.getName()+":"+"已加密，点击图片解锁");
-                                Toast.makeText(context, "加密成功", Toast.LENGTH_SHORT).show();
-                            }else {
-                                if (mediaVideo.getPassword().equals(pwd)){
-                                    mediaVideo.setPwd(false);
-                                    mediaVideo.setPassword("((((~null!@#$%w#je*wf$y5#@feg))))");
-                                    mediaVideo.save();
-                                    Toast.makeText(context, "解锁成功", Toast.LENGTH_SHORT).show();
-                                    holder.textView.setText(mediaVideo.getName()+":"+"未加密，点击图片加密");
-                                }else{
-
-                                    Toast.makeText(context, "密码不正确", Toast.LENGTH_SHORT).show();
-                                }
-                            }
-                        }
+                        presenterAdapter.getPass(holder,pwd,position);
                         dialog.dismiss();
                     }
                 });
@@ -115,13 +95,9 @@ public class Adapter_Big extends RecyclerView.Adapter<Adapter_Big.MyViewHolder>{
         });
     }
 
-    @Override
-    public int getItemCount() {
-        //返回Item总条数
-        return list.size();
-    }
+
     //内部类，绑定控件
-    class MyViewHolder extends RecyclerView.ViewHolder{
+    public class MyViewHolder extends RecyclerView.ViewHolder{
         TextView textView;
         ImageView imageView;
         public MyViewHolder(View itemView) {

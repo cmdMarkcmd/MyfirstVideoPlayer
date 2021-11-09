@@ -1,11 +1,8 @@
-package com.example.uv2;
+package com.example.uv2.largeadapter;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
-import android.content.Intent;
-import android.graphics.Rect;
 import android.media.MediaPlayer;
-import android.os.SystemClock;
-import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -18,12 +15,11 @@ import android.widget.Toast;
 import android.widget.VideoView;
 
 import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.PagerSnapHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
-import org.litepal.LitePal;
+import com.example.uv2.FlyHeartView;
+import com.example.uv2.MediaVideo;
+import com.example.uv2.R;
 
 import java.util.List;
 
@@ -35,16 +31,17 @@ import java.util.List;
    onBindViewHolder()
    getItemCount()
 */
-public class Adapter_Biggest extends RecyclerView.Adapter<Adapter_Biggest.MyViewHolder>{
+public class LargeAdapter extends RecyclerView.Adapter<LargeAdapter.MyViewHolder> implements IViewLarge{
 
     private Context context;
     private static long lastClickTime = 0;
-    private List<MediaVideo> list;
     private View inflater;
+    private IPresenterLarge presenterLarge;
     //构造方法，传入数据
-    public Adapter_Biggest(Context context, List<MediaVideo> list){
+    public LargeAdapter(Context context, List<MediaVideo> list){
+        presenterLarge = new PresenterLarge(this);
+        presenterLarge.setInfo(context,list);
         this.context = context;
-        this.list = list;
     }
 
     @Override
@@ -52,17 +49,16 @@ public class Adapter_Biggest extends RecyclerView.Adapter<Adapter_Biggest.MyView
         //创建ViewHolder，返回每一项的布局
         inflater = LayoutInflater.from(context).inflate(R.layout.activity_show_video,parent,false);
         MyViewHolder myViewHolder = new MyViewHolder(inflater);
-
         return myViewHolder;
     }
 
+    @Override
     public void CustomDialog(MediaVideo mediaVideo, MyViewHolder holder) {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         final AlertDialog dialog = builder.create();
         View dialogView = View.inflate(context, R.layout.alert_dialog, null);
         dialog.setView(dialogView);
         dialog.show();
-
         final EditText et_name = dialogView.findViewById(R.id.et_name);
         et_name.setText(mediaVideo.getName());
         final EditText et_sts = dialogView.findViewById(R.id.et_sts);
@@ -78,18 +74,8 @@ public class Adapter_Biggest extends RecyclerView.Adapter<Adapter_Biggest.MyView
                 final String name =et_name.getText().toString();
                 final String sts = et_sts.getText().toString();
                 final String tag = et_tag.getText().toString();
-                if (TextUtils.isEmpty(name)) {
-                    Toast.makeText(context, "视频名不能为空!", Toast.LENGTH_SHORT).show();
-                    mediaVideo.setName("<未命名>");
-                }else{
-                    mediaVideo.setName(name);
-                }
-                if(!TextUtils.isEmpty(sts)) mediaVideo.setSentence(sts);
-                if(!TextUtils.isEmpty(tag)) mediaVideo.setTag(tag);
-                mediaVideo.save();
-                holder.nameButton.setText(mediaVideo.getName());
-                holder.tagButton.setText("标签："+mediaVideo.getTag());
-                holder.textButton.setText("简介："+mediaVideo.getSentence());
+                presenterLarge.DialogOkay(mediaVideo,name,sts,tag);
+                showVideo(holder,mediaVideo);
                 dialog.dismiss();
             }
         });
@@ -102,25 +88,24 @@ public class Adapter_Biggest extends RecyclerView.Adapter<Adapter_Biggest.MyView
     }
 
     @Override
-    public void onBindViewHolder(MyViewHolder holder, int position) {
-
-        //将数据和控件绑定
-        position = holder.getAdapterPosition();
-        MediaVideo mediaVideo = list.get(position);
+    public void showVideo(MyViewHolder holder, MediaVideo mediaVideo){
         holder.nameButton.setText(mediaVideo.getName());
         holder.tagButton.setText("标签："+mediaVideo.getTag());
         holder.textButton.setText("简介："+mediaVideo.getSentence());
         holder.likeButton.setText("赞："+String.valueOf(mediaVideo.getLike()));
         holder.videoView.setVideoPath(mediaVideo.getPath());
+    }
+
+
+    @Override
+    public void onBindViewHolder(MyViewHolder holder, @SuppressLint("RecyclerView") int position) {
+
+        //将数据和控件绑定
+        presenterLarge.VideoShow(holder,position);
         holder.likeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                holder.flyHeartView.startFly(1350f,2100f);
-                holder.flyHeartView.startFly(1350f,2100f);
-                holder.flyHeartView.startFly(1350f,2100f);
-                mediaVideo.setLike(mediaVideo.getLike()+1);
-                mediaVideo.save();
-                holder.likeButton.setText("赞："+String.valueOf(mediaVideo.getLike()));
+                presenterLarge.showLike(holder,position);
             }
         });
 
@@ -136,18 +121,7 @@ public class Adapter_Biggest extends RecyclerView.Adapter<Adapter_Biggest.MyView
             public boolean onTouch(View v, MotionEvent event) {holder.itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    long currentT = SystemClock.uptimeMillis();
-                    if(currentT - lastClickTime < 300) {
-                        holder.flyHeartView.startFly(event.getX(),event.getY());
-                        holder.flyHeartView.startFly(event.getX(),event.getY());
-                        holder.flyHeartView.startFly(event.getX(),event.getY());
-                        mediaVideo.setLike(mediaVideo.getLike()+1);
-                        mediaVideo.save();
-                        holder.likeButton.setText("赞："+String.valueOf(mediaVideo.getLike()));
-                    }else if(!holder.videoView.isPlaying()){
-                        holder.videoView.start();
-                    }
-                    lastClickTime = currentT;
+                    presenterLarge.showLike(holder,position,event.getX(),event.getY());
                 }
             });
                 return false;
@@ -162,23 +136,22 @@ public class Adapter_Biggest extends RecyclerView.Adapter<Adapter_Biggest.MyView
         holder.deleteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mediaVideo.delete();
+                presenterLarge.deleteVideo(position);
                 Toast.makeText(context,"删除成功",Toast.LENGTH_SHORT).show();
             }
         });
+
         holder.editButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                CustomDialog(mediaVideo,holder);
+                presenterLarge.comeDialog(holder,position);
             }
         });
+
         holder.tagButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent1 = new Intent(context ,TagVideo.class);
-                intent1.putExtra("extra_data2",mediaVideo.getTag());
-                context.startActivity(intent1);
-
+                presenterLarge.goTo(position);
             }
         });
         holder.itemView.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
@@ -200,7 +173,7 @@ public class Adapter_Biggest extends RecyclerView.Adapter<Adapter_Biggest.MyView
     @Override
     public int getItemCount() {
         //返回Item总条数
-        return list.size();
+        return presenterLarge.getSize();
     }
     //内部类，绑定控件
     class MyViewHolder extends RecyclerView.ViewHolder{
