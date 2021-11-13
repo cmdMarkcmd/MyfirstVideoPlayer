@@ -33,7 +33,7 @@ public class MainActivity extends AppCompatActivity implements IViewMain {
     private List<MediaVideo> list;
     private IPresenterMain presenter;
     private RoundImage picture;
-
+private native String getStringFromCPP();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -43,6 +43,8 @@ public class MainActivity extends AppCompatActivity implements IViewMain {
         SQLiteDatabase db = LitePal.getDatabase();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        System.loadLibrary("uv2");
+        Toast.makeText(this, getStringFromCPP(), Toast.LENGTH_SHORT).show();
         presenter = new PresenterMain(this);
         if(!presenter.askUI()){
             Toast.makeText(MainActivity.this,"无可直接播放视频",Toast.LENGTH_SHORT).show();
