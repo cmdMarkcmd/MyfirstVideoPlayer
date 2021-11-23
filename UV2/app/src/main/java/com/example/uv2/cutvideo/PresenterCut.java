@@ -113,7 +113,7 @@ public class PresenterCut implements IPresenterCut{
         //fmpeg -i input -c:v libx264 -preset slow -crf 22-c:a copy output.mkv
         //ffmpeg -ss {0} -to {1} -accurate_seek -i {2} -c:v libx264  -avoid_negative_ts 1  -y {3}
         //ffmpeg -ss 00:00:00 -i 1.mp4 -vcodec libx264 00:00:20 -y 2.mp4
-        //ffmpeg -ss [start] -t [duration] -i [in].mp4  -c:v libx264 -c:a aac -strict experimental -b:a 98k [out].mp4
+        //ffmpeg -ss 0 -t 100 -i 1.mp4  -c:v libx264 -c:a aac -strict experimental -b:a 98k 2.mp4
         ArrayList<String> cmd = new ArrayList<>();
         cmd.add("ffmpeg");
         cmd.add("-ss");
