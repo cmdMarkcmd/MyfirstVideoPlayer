@@ -126,11 +126,12 @@
         app:layout_constraintStart_toStartOf="@+id/button3"
         app:layout_constraintTop_toBottomOf="@+id/button7" />
 
+
     <Button
         android:id="@+id/buttonpwd"
         android:layout_width="64dp"
         android:layout_height="43dp"
-        android:layout_marginStart="20dp"
+        android:layout_marginStart="28dp"
         android:layout_marginTop="4dp"
         android:background="@color/black"
         android:gravity="center"

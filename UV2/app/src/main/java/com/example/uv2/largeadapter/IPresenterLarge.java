@@ -11,6 +11,8 @@ public interface IPresenterLarge {
 
     void VideoShow(LargeAdapter.MyViewHolder holder, int position);
 
+    void cutVideo(int position);
+
     void showLike(LargeAdapter.MyViewHolder holder, int position);
 
     void showLike(LargeAdapter.MyViewHolder holder, int position, float x, float y);

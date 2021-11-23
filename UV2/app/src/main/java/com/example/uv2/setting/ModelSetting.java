@@ -72,7 +72,6 @@ public class ModelSetting implements IModelSetting{
         return BitmapFactory.decodeFile(LitePal.findLast(MediaPicture.class).getPath());
     }
 
-
     @Override
     public void openCamera(AppCompatActivity appCompatActivity){
         File outputImage = new File(appCompatActivity.getExternalCacheDir(), "output_image.jpg");

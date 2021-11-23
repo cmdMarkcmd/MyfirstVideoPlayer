@@ -33,18 +33,22 @@ public class MainActivity extends AppCompatActivity implements IViewMain {
     private List<MediaVideo> list;
     private IPresenterMain presenter;
     private RoundImage picture;
-private native String getStringFromCPP();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
         /*=================litepal数据库=====================*/
         LitePal.initialize(this);
-        //获取到SQLiteDatabase的实例，创建数据库表
         SQLiteDatabase db = LitePal.getDatabase();
+        //获取到SQLiteDatabase的实例，创建数据库表
+        //cmake cpp library:
+//        System.loadLibrary("uv2");
+
+
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        System.loadLibrary("uv2");
-        Toast.makeText(this, getStringFromCPP(), Toast.LENGTH_SHORT).show();
+
+
         presenter = new PresenterMain(this);
         if(!presenter.askUI()){
             Toast.makeText(MainActivity.this,"无可直接播放视频",Toast.LENGTH_SHORT).show();

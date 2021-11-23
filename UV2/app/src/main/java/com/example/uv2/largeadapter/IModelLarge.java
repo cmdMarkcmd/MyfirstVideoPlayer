@@ -15,7 +15,9 @@ public interface IModelLarge {
 
     void showLike1(LargeAdapter.MyViewHolder holder, MediaVideo mediaVideo);
 
-    void showLike2(LargeAdapter.MyViewHolder holder, MediaVideo mediaVideo,float x,float y);
+    void goCutting(MediaVideo mediaVideo);
+
+    void showLike2(LargeAdapter.MyViewHolder holder, MediaVideo mediaVideo, float x, float y);
 
     void goToTag(MediaVideo mediaVideo);
 

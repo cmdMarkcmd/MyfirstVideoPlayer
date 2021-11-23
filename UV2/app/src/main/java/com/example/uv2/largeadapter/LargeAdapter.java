@@ -154,6 +154,13 @@ public class LargeAdapter extends RecyclerView.Adapter<LargeAdapter.MyViewHolder
                 presenterLarge.goTo(position);
             }
         });
+
+        holder.cutButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                presenterLarge.cutVideo(position);
+            }
+        });
         holder.itemView.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
             @Override
             public void onViewAttachedToWindow(View v) {
@@ -178,15 +185,17 @@ public class LargeAdapter extends RecyclerView.Adapter<LargeAdapter.MyViewHolder
     //内部类，绑定控件
     class MyViewHolder extends RecyclerView.ViewHolder{
         TextView nameButton;
-        TextView textButton ;
+      TextView textButton ;
         TextView likeButton ;
         TextView tagButton ;
         VideoView videoView ;
         Button deleteButton ;
         Button editButton ;
+        Button cutButton;
         FlyHeartView flyHeartView;
         public MyViewHolder(View itemView) {
             super(itemView);
+            cutButton = (Button) itemView.findViewById(R.id.CutVideoButton);
             nameButton = (TextView) itemView.findViewById(R.id.TextViewToShow);
             textButton = (TextView) itemView.findViewById(R.id.TitleViewToShow);
             likeButton = (TextView) itemView.findViewById(R.id.likeText);

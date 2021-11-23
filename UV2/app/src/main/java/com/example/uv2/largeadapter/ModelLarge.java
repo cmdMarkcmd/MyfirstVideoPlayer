@@ -7,6 +7,7 @@ import android.text.TextUtils;
 import android.widget.Toast;
 
 import com.example.uv2.MediaVideo;
+import com.example.uv2.cutvideo.CutActivity;
 import com.example.uv2.tagvideo.TagVideo;
 
 import java.util.List;
@@ -40,6 +41,13 @@ public class ModelLarge implements IModelLarge{
         mediaVideo.setLike(mediaVideo.getLike()+1);
         mediaVideo.save();
         holder.likeButton.setText("赞："+String.valueOf(mediaVideo.getLike()));
+    }
+
+    @Override
+    public void goCutting(MediaVideo mediaVideo){
+        Intent intent =new Intent(context, CutActivity.class);
+        intent.putExtra("IDV",mediaVideo.getPath());
+        context.startActivity(intent);
     }
 
     @Override

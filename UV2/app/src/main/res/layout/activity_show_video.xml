@@ -56,6 +56,18 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
+    <Button
+        android:id="@+id/CutVideoButton"
+        android:layout_width="74dp"
+        android:layout_height="35dp"
+        android:background="@color/black"
+        android:text="剪辑"
+        android:textColor="@color/white"
+        app:layout_constraintBottom_toBottomOf="@+id/relativeLayout"
+        app:layout_constraintEnd_toStartOf="@+id/EditButton"
+        app:layout_constraintStart_toEndOf="@+id/DeleteButton"
+        app:layout_constraintTop_toBottomOf="@+id/TitleViewToShow" />
+
     <TextView
         android:id="@+id/TagButton"
         android:layout_width="120dp"

@@ -1,0 +1,15 @@
+[Script Info]
+ScriptType: v4.00+
+WrapStyle: 0
+ScaledBorderAndShadow: yes
+YCbCr Matrix: TV.601
+PlayResX: 300
+PlayResY: 186
+
+[V4+ Styles]
+Format:Name,Fontsize,PrimaryCoulour,BorderStyle,Outline,Shadow,Alignment,MarginL,MarginR,MarginV
+Style:sorry,30,&H008DF89F,1,1.2913,0.538046,2,0,0,1
+
+[Events]
+Format:Layer,Start,End,Style,Text
+Dialogue: 0,00:00:00.10,00:00:13.10,sorry,word1

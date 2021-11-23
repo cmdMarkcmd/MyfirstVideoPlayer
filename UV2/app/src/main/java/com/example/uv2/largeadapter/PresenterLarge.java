@@ -26,6 +26,12 @@ public class PresenterLarge implements IPresenterLarge,IFinishLarge{
     }
 
     @Override
+    public void cutVideo(int position){
+        model.goCutting(model.getItem(position));
+    }
+
+
+    @Override
     public void showLike(LargeAdapter.MyViewHolder holder, int position){
         model.showLike1(holder, model.getItem(position));
     }

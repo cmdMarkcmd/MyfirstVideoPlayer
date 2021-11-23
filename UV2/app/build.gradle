@@ -7,18 +7,19 @@ android {
 
     defaultConfig {
         applicationId "com.example.uv2"
-        minSdk 30
+        minSdk 21
         targetSdk 31
         versionCode 1
         versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         externalNativeBuild {
+            ndk{abiFilters "arm64-v8a"}
             cmake {
                 cppFlags ''
             }
         }
-ndkVersion '23.1.7779620'
+        ndkVersion '23.1.7779620'
     }
 
     buildTypes {
@@ -28,8 +29,8 @@ ndkVersion '23.1.7779620'
         }
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility 1.8
+        targetCompatibility 1.8
     }
     externalNativeBuild {
         cmake {
@@ -37,6 +38,7 @@ ndkVersion '23.1.7779620'
             version '3.10.2'
         }
     }
+    ndkVersion '23.1.7779620'
 
 
 }

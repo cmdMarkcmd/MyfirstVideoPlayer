@@ -7,6 +7,7 @@ import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -35,7 +36,6 @@ public class SettingActivity extends AppCompatActivity implements IViewSettingAc
         pic2 = (ImageView) findViewById(R.id.imageView2);
 
         presenter.setHeadShot();
-
 
         takePhoto.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -112,4 +112,5 @@ public class SettingActivity extends AppCompatActivity implements IViewSettingAc
             }
         });
     }
+
 }

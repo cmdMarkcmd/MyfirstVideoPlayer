@@ -17,6 +17,7 @@ import androidx.core.content.ContextCompat;
 
 import com.example.uv2.MediaPicture;
 import com.example.uv2.MediaVideo;
+import com.example.uv2.cutvideo.CutActivity;
 import com.example.uv2.showfull.ShowFull;
 
 import org.litepal.LitePal;
@@ -61,7 +62,6 @@ public class SettingPresenter implements IPresenterSetting, IFinishSettingListen
     public void initVideoPath() {
         model.ChooseVideo(appCompatActivity);
     }
-
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
