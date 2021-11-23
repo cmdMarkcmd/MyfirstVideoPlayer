@@ -26,7 +26,7 @@
 #ifndef AVUTIL_TIMER_H
 #define AVUTIL_TIMER_H
 
-#include "config.h"
+#include "../config.h"
 
 #if CONFIG_LINUX_PERF
 # ifndef _GNU_SOURCE
@@ -56,6 +56,8 @@
 #   include "arm/timer.h"
 #elif ARCH_PPC
 #   include "ppc/timer.h"
+#elif ARCH_X86
+#   include "x86/timer.h"
 #endif
 
 #if !defined(AV_READ_TIME)
